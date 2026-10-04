@@ -1,6 +1,13 @@
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, Share, StyleSheet, Text, View } from "react-native";
+import {
+  Linking,
+  Pressable,
+  Share,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import PinMap from "../../components/PinMap";
 import { Place, deletePlace, getPlace, toggleDone } from "../../store";
@@ -36,11 +43,25 @@ export default function PlaceDetailsScreen() {
     router.back();
   }
 
+  async function handleCall() {
+    if (place === null || !place.phone) return;
+    const cleaned = place.phone.replace(/[^\d+]/g, "");
+    if (cleaned === "") return;
+    try {
+      await Linking.openURL("tel:" + cleaned);
+    } catch {
+      // the phone could not open the dialer
+    }
+  }
+
   async function handleShare() {
     if (place === null) return;
     let message = place.name;
     if (place.note !== "") {
       message += "\n" + place.note;
+    }
+    if (place.phone) {
+      message += "\nPhone: " + place.phone;
     }
     if (typeof place.lat === "number" && typeof place.lng === "number") {
       message +=
@@ -71,6 +92,7 @@ export default function PlaceDetailsScreen() {
   }
 
   const hasPin = typeof place.lat === "number" && typeof place.lng === "number";
+  const hasPhone = !!place.phone && place.phone.trim() !== "";
 
   return (
     <View
@@ -89,6 +111,8 @@ export default function PlaceDetailsScreen() {
         {place.note === "" ? "No note for this place." : place.note}
       </Text>
 
+      {hasPhone && <Text style={styles.phone}>Phone: {place.phone}</Text>}
+
       {hasPin ? (
         <View style={styles.mapBox}>
           <PinMap lat={place.lat} lng={place.lng} readOnly />
@@ -97,9 +121,16 @@ export default function PlaceDetailsScreen() {
         <Text style={styles.noPin}>No pin saved for this place.</Text>
       )}
 
-      <Pressable style={styles.shareButton} onPress={handleShare}>
-        <Text style={styles.shareText}>Share place</Text>
-      </Pressable>
+      <View style={styles.actionRow}>
+        {hasPhone && (
+          <Pressable style={styles.callButton} onPress={handleCall}>
+            <Text style={styles.callText}>Call</Text>
+          </Pressable>
+        )}
+        <Pressable style={styles.shareButton} onPress={handleShare}>
+          <Text style={styles.shareText}>Share place</Text>
+        </Pressable>
+      </View>
 
       <Pressable style={styles.doneButton} onPress={handleToggleDone}>
         <Text style={styles.buttonText}>
@@ -139,7 +170,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.mutedText,
     marginTop: 8,
-    marginBottom: 16,
+    marginBottom: 12,
+  },
+  phone: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: colors.text,
+    marginBottom: 12,
   },
   noPin: {
     fontSize: 15,
@@ -159,13 +196,32 @@ const styles = StyleSheet.create({
     color: colors.pending,
     fontWeight: "600",
   },
-  shareButton: {
+  actionRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 10,
+  },
+  callButton: {
+    flex: 1,
+    backgroundColor: colors.card,
     borderWidth: 1.5,
     borderColor: colors.primary,
     borderRadius: 10,
     padding: 14,
     alignItems: "center",
-    marginBottom: 10,
+  },
+  callText: {
+    color: colors.primary,
+    fontSize: 17,
+    fontWeight: "600",
+  },
+  shareButton: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    borderRadius: 10,
+    padding: 14,
+    alignItems: "center",
   },
   shareText: {
     color: colors.primary,

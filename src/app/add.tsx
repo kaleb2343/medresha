@@ -17,6 +17,7 @@ import { colors } from "../theme";
 export default function AddPlaceScreen() {
   const [name, setName] = useState("");
   const [note, setNote] = useState("");
+  const [phone, setPhone] = useState("");
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
   const [error, setError] = useState("");
@@ -69,7 +70,7 @@ export default function AddPlaceScreen() {
       setError("Please tap the map or use your location to drop a pin.");
       return;
     }
-    await addPlace(name.trim(), note.trim(), lat, lng);
+    await addPlace(name.trim(), note.trim(), lat, lng, phone.trim());
     router.back();
   }
 
@@ -99,6 +100,16 @@ export default function AddPlaceScreen() {
         value={note}
         onChangeText={setNote}
         multiline
+      />
+
+      <Text style={styles.label}>Phone (optional)</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Example: 0911 22 33 44"
+        placeholderTextColor={colors.mutedText}
+        value={phone}
+        onChangeText={setPhone}
+        keyboardType="phone-pad"
       />
 
       <Text style={styles.label}>Tap the map to drop a pin</Text>
@@ -141,13 +152,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 12,
   },
   label: {
     fontSize: 16,
     fontWeight: "600",
     color: colors.primary,
-    marginTop: 12,
+    marginTop: 10,
     marginBottom: 6,
   },
   input: {
@@ -160,7 +171,7 @@ const styles = StyleSheet.create({
     borderColor: colors.inputBorder,
   },
   noteInput: {
-    height: 80,
+    height: 70,
     textAlignVertical: "top",
   },
   locationButton: {

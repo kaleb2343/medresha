@@ -7,6 +7,7 @@ export type Place = {
   done: boolean;
   lat?: number | null;
   lng?: number | null;
+  phone?: string;
 };
 
 const STORAGE_KEY = "delivery-pin-places";
@@ -37,7 +38,8 @@ export async function addPlace(
   name: string,
   note: string,
   lat: number | null,
-  lng: number | null
+  lng: number | null,
+  phone: string = ""
 ): Promise<void> {
   const current = await getPlaces();
   const newPlace: Place = {
@@ -47,6 +49,7 @@ export async function addPlace(
     done: false,
     lat,
     lng,
+    phone,
   };
   await savePlaces([newPlace, ...current]);
 }
