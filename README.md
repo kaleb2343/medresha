@@ -1,56 +1,38 @@
-# Welcome to your Expo app 👋
+# Medresha (መድረሻ)
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Save the exact door. Find it again anytime.**
 
-## Get started
+Medresha is a simple Android app for delivery people in Addis Ababa. Addis has few street addresses, so drivers often hear "blue gate, behind the pharmacy" and get lost. Medresha works like a notebook with a map: drop a pin on the exact door, write a short note, and find it again next time.
 
-1. Install dependencies
+## What it does
 
-   ```bash
-   npm install
-   ```
+- Save a place with a name, a note, and a pin on the map
+- See all your places in one list, with Pending and Done counts
+- Open a place to see its note and its pin on the map
+- Mark a place as Done, or delete it
+- Places are saved on the phone, so no account or server is needed
 
-2. Start the app
+## Built with
 
-   ```bash
-   npx expo start
-   ```
+- React Native and Expo (Expo Router, TypeScript)
+- AsyncStorage for saving data on the phone
+- Leaflet and OpenStreetMap inside a WebView for the map
+- EAS Build for the Android APK
 
-In the output, you'll find options to open the app in a
+## Run it on your computer
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+1. Install the tools: `npm install`
+2. Start the app: `npx expo start --tunnel`
+3. Open the link in the Expo Go app on your phone
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Status
 
-## Get a fresh project
+Work in progress. The first Android APK works on a real phone. Next: logo and icon, a landing page, and a "Use my location" button.
 
-When you're ready, run:
+## Credits
 
-```bash
-npm run reset-project
-```
+Map data from OpenStreetMap contributors.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Rights
 
-### Other setup steps
-
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Copyright 2026 Kaleb Dawit. All rights reserved.
