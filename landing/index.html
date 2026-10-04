@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Medresha (መድረሻ) | Save the exact door</title>
+  <meta name="description" content="Medresha is a free Android notebook with a map for delivery people in Addis Ababa. Drop a pin on the exact door, write a note, and find it again anytime." />
+  <meta property="og:title" content="Medresha (መድረሻ) | Save the exact door" />
+  <meta property="og:description" content="A free notebook with a map for delivery people in Addis Ababa. Drop a pin, write a note, find it again." />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#7F011F" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+Ethiopic:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --wine: #7F011F;
+      --wine-dark: #5E0117;
+      --sand: #F5EBD0;
+      --card: #FFFBF2;
+      --ink: #2B0A12;
+      --muted: #7A5C61;
+      --line: #E3D5B0;
+      --done: #2E7D4F;
+      --pending: #B45309;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--sand);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+    .am { font-family: "Noto Sans Ethiopic", "Inter", sans-serif; }
+    a { color: inherit; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+
+    /* Header */
+    header { padding: 18px 0; }
+    .nav { display: flex; align-items: center; justify-content: space-between; }
+    .brand {
+      display: flex; align-items: center; gap: 10px;
+      font-weight: 700; font-size: 20px;
+      color: var(--wine); text-decoration: none;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-block;
+      background: var(--wine); color: var(--sand);
+      padding: 14px 26px; border-radius: 12px;
+      font-weight: 600; text-decoration: none;
+    }
+    .btn:hover { background: var(--wine-dark); }
+    .btn.small { padding: 9px 18px; font-size: 15px; }
+    .btn.ghost {
+      background: transparent; color: var(--wine);
+      border: 2px solid var(--wine);
+      padding: 12px 24px;
+    }
+    .btn.ghost:hover { background: var(--wine); color: var(--sand); }
+
+    /* Hero */
+    .hero { display: grid; gap: 40px; padding: 36px 0 64px; align-items: center; }
+    @media (min-width: 860px) { .hero { grid-template-columns: 1.1fr 0.9fr; } }
+    .eyebrow {
+      font-size: 13px; font-weight: 600; letter-spacing: 1.5px;
+      color: var(--muted); text-transform: uppercase;
+    }
+    h1 {
+      font-size: clamp(34px, 6vw, 56px);
+      line-height: 1.1; margin: 8px 0 16px; color: var(--wine);
+    }
+    .lead { font-size: 18px; color: var(--muted); max-width: 520px; margin: 0 0 24px; }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
+    .meta { font-size: 14px; color: var(--muted); margin-top: 14px; }
+
+    /* Phone mock of the app home screen */
+    .phone-wrap { display: flex; justify-content: center; }
+    .phone {
+      width: 280px;
+      border: 10px solid var(--ink);
+      border-radius: 38px;
+      background: var(--sand);
+      padding: 26px 16px 20px;
+      box-shadow: 0 24px 48px rgba(43, 10, 18, 0.25);
+    }
+    .m-brand { font-size: 10px; letter-spacing: 1.4px; font-weight: 600; color: var(--muted); margin: 0; }
+    .m-title { font-size: 24px; font-weight: 700; color: var(--wine); margin: 2px 0 0; line-height: 1.2; }
+    .m-sub { font-size: 11px; color: var(--muted); margin: 2px 0 12px; }
+    .m-stats { display: flex; gap: 8px; margin-bottom: 10px; }
+    .m-stat {
+      flex: 1; background: var(--card); border: 1px solid var(--line);
+      border-radius: 10px; padding: 8px 10px;
+    }
+    .m-stat b { display: block; font-size: 20px; }
+    .m-stat span { font-size: 11px; color: var(--muted); }
+    .m-card {
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: 10px; padding: 10px 12px; margin-bottom: 8px;
+      display: flex; justify-content: space-between; gap: 8px; align-items: center;
+    }
+    .m-card strong { font-size: 13px; display: block; }
+    .m-card small { font-size: 11px; color: var(--muted); display: block; }
+    .m-card em { font-size: 10px; font-style: normal; color: var(--wine); font-weight: 600; }
+    .tag-p { color: var(--pending); font-size: 11px; font-weight: 600; }
+    .tag-d { color: var(--done); font-size: 11px; font-weight: 600; }
+
+    /* Sections */
+    section { padding: 56px 0; }
+    section.alt { background: var(--card); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    h2 { font-size: clamp(26px, 4vw, 36px); line-height: 1.2; margin: 0 0 12px; color: var(--wine); }
+    .section-lead { color: var(--muted); max-width: 640px; margin: 0 0 28px; font-size: 17px; }
+    .grid { display: grid; gap: 16px; }
+    @media (min-width: 760px) { .grid.three { grid-template-columns: repeat(3, 1fr); } .grid.two { grid-template-columns: repeat(2, 1fr); } }
+    .card {
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: 14px; padding: 22px;
+    }
+    section.alt .card { background: var(--sand); }
+    .card h3 { margin: 0 0 6px; font-size: 18px; }
+    .card p { margin: 0; color: var(--muted); }
+    .num {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--wine); color: var(--sand);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; margin-bottom: 12px;
+    }
+    .quote {
+      font-size: clamp(20px, 3vw, 26px); font-weight: 600;
+      color: var(--ink); max-width: 700px; margin: 0;
+    }
+
+    /* Install steps */
+    ol.steps { margin: 0; padding-left: 22px; }
+    ol.steps li { margin-bottom: 10px; }
+    .note {
+      background: var(--sand); border-left: 4px solid var(--wine);
+      padding: 14px 16px; border-radius: 8px; margin-top: 18px; color: var(--muted);
+    }
+
+    /* FAQ */
+    details {
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: 12px; padding: 14px 18px; margin-bottom: 10px;
+    }
+    summary { font-weight: 600; cursor: pointer; }
+    details p { margin: 10px 0 0; color: var(--muted); }
+
+    /* Footer */
+    footer { padding: 36px 0 48px; color: var(--muted); font-size: 14px; text-align: center; }
+    footer a { color: var(--wine); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="wrap nav">
+      <a class="brand" href="#top">
+        <svg width="26" height="34" viewBox="0 0 34 44" aria-hidden="true">
+          <path d="M17 0C7.6 0 0 7.6 0 17c0 12.5 17 27 17 27s17-14.5 17-27C34 7.6 26.4 0 17 0z" fill="#7F011F"/>
+          <circle cx="17" cy="17" r="7" fill="#F5EBD0"/>
+        </svg>
+        Medresha
+      </a>
+      <a class="btn small" href="#download">Download</a>
+    </div>
+  </header>
+
+  <main id="top">
+    <div class="wrap hero">
+      <div>
+        <div class="eyebrow">Medresha · <span class="am">መድረሻ</span></div>
+        <h1>Save the exact door. Find it again anytime.</h1>
+        <p class="lead">
+          Addis has few street addresses, so delivery people hear "blue gate, behind the pharmacy" and get lost.
+          Medresha is a notebook with a map. Drop a pin on the door, write a short note, and open it next time.
+        </p>
+        <div class="cta-row">
+          <a class="btn" href="https://github.com/kaleb2343/medresha/releases/latest/download/medresha.apk">Download for Android</a>
+          <a class="btn ghost" href="#how">How it works</a>
+        </div>
+        <div class="meta">Free · No account · Android only · about 24 MB</div>
+      </div>
+
+      <div class="phone-wrap">
+        <div class="phone" role="img" aria-label="Medresha home screen showing a list of saved places">
+          <p class="m-brand">MEDRESHA · <span class="am">መድረሻ</span></p>
+          <p class="m-title">My Places</p>
+          <p class="m-sub">Save the exact door. Find it again anytime.</p>
+          <div class="m-stats">
+            <div class="m-stat"><b style="color:#B45309">2</b><span>Pending</span></div>
+            <div class="m-stat"><b style="color:#2E7D4F">1</b><span>Done</span></div>
+          </div>
+          <div class="m-card">
+            <div><strong>Selam Pharmacy</strong><small>Blue gate, behind the church</small><em>Pin saved</em></div>
+            <span class="tag-p">Pending</span>
+          </div>
+          <div class="m-card">
+            <div><strong>Dawit's Shop</strong><small>2nd floor, green door</small><em>Pin saved</em></div>
+            <span class="tag-p">Pending</span>
+          </div>
+          <div class="m-card">
+            <div><strong>Hana's Office</strong><small>Next to the bank, side door</small><em>Pin saved</em></div>
+            <span class="tag-d">Done</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="alt">
+      <div class="wrap">
+        <p class="quote">"I am near the blue gate, behind the pharmacy." Then ten phone calls. Medresha makes that the last time.</p>
+      </div>
+    </section>
+
+    <section id="how">
+      <div class="wrap">
+        <h2>How it works</h2>
+        <p class="section-lead">Three taps. No account, no setup.</p>
+        <div class="grid three">
+          <div class="card"><div class="num">1</div><h3>Drop a pin</h3><p>Stand at the door, open the map, and tap the exact place.</p></div>
+          <div class="card"><div class="num">2</div><h3>Write a note</h3><p>Add the small directions only you know: the gate color, the floor, who to ask for.</p></div>
+          <div class="card"><div class="num">3</div><h3>Find it again</h3><p>Next delivery, open the place and see the pin and your note. Mark it Done when you finish.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="alt">
+      <div class="wrap">
+        <h2>Made to be simple</h2>
+        <p class="section-lead">One job, done well.</p>
+        <div class="grid two">
+          <div class="card"><h3>Your places stay on your phone</h3><p>Everything you save is stored on your device. No account and no server.</p></div>
+          <div class="card"><h3>Pending and Done at a glance</h3><p>See what is left for today and what you already delivered.</p></div>
+          <div class="card"><h3>Small and light</h3><p>About 24 MB, so it installs fast even on cheaper phones.</p></div>
+          <div class="card"><h3>Free</h3><p>No ads and no payments.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="download">
+      <div class="wrap">
+        <h2>Download Medresha</h2>
+        <p class="section-lead">Medresha is not on the Play Store yet, so you install the file directly. It takes about a minute.</p>
+        <p><a class="btn" href="https://github.com/kaleb2343/medresha/releases/latest/download/medresha.apk">Download APK</a></p>
+        <h3>How to install</h3>
+        <ol class="steps">
+          <li>Tap <b>Download APK</b> and open the file when it finishes.</li>
+          <li>If Android asks, allow your browser to install apps.</li>
+          <li>If Google Play Protect shows a warning, tap <b>More details</b>, then <b>Install anyway</b>.</li>
+          <li>Open <b>Medresha</b> and tap the <b>+</b> button to save your first place.</li>
+        </ol>
+        <div class="note">
+          <b>Why the warning?</b> Google shows it for any app that does not come from the Play Store. The code is open to look at on
+          <a href="https://github.com/kaleb2343/medresha">GitHub</a>.
+        </div>
+      </div>
+    </section>
+
+    <section class="alt">
+      <div class="wrap">
+        <h2>Questions</h2>
+        <details>
+          <summary>Does it work without internet?</summary>
+          <p>Your saved places and notes open without internet. The map pictures need internet to load.</p>
+        </details>
+        <details>
+          <summary>Is there an iPhone version?</summary>
+          <p>Not yet. Medresha is Android only for now.</p>
+        </details>
+        <details>
+          <summary>Do I need an account?</summary>
+          <p>No. Open the app and start saving places.</p>
+        </details>
+        <details>
+          <summary>Who made it?</summary>
+          <p>Kaleb Dawit, a developer and designer in Addis Ababa. See more at <a href="https://kalebdawit.vercel.app">kalebdawit.vercel.app</a>.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>© 2026 Kaleb Dawit. All rights reserved.</p>
+      <p>Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · <a href="https://github.com/kaleb2343/medresha">Code on GitHub</a></p>
+    </div>
+  </footer>
+
+</body>
+</html>

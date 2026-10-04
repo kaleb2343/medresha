@@ -1,4 +1,4 @@
-import { createElement, useEffect, useMemo } from "react";
+import { createElement, useEffect, useMemo, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 import { LEAFLET_CSS, LEAFLET_JS } from "./leafletAssets";
 
@@ -7,6 +7,7 @@ type Props = {
   lat?: number | null;
   lng?: number | null;
   readOnly?: boolean;
+  flyTo?: { lat: number; lng: number; id: number } | null;
 };
 
 function buildHtml(lat: number | null, lng: number | null, readOnly: boolean) {
@@ -48,6 +49,23 @@ function buildHtml(lat: number | null, lng: number | null, readOnly: boolean) {
     marker = L.marker([${centerLat}, ${centerLng}], { icon: pinIcon }).addTo(map);
   }
 
+  function setPin(lat, lng) {
+    var ll = L.latLng(lat, lng);
+    if (marker) {
+      marker.setLatLng(ll);
+    } else {
+      marker = L.marker(ll, { icon: pinIcon }).addTo(map);
+    }
+    map.setView(ll, 18);
+  }
+
+  window.addEventListener("message", function (e) {
+    var d = e.data;
+    if (d && d.type === "setPin") {
+      setPin(d.lat, d.lng);
+    }
+  });
+
   map.on("click", function (e) {
     if (readOnly) {
       return;
@@ -73,11 +91,22 @@ export default function PinMap({
   lat = null,
   lng = null,
   readOnly = false,
+  flyTo = null,
 }: Props) {
+  const frameRef = useRef<HTMLIFrameElement | null>(null);
+
   const html = useMemo(
     () => buildHtml(lat, lng, readOnly),
     [lat, lng, readOnly]
   );
+
+  useEffect(() => {
+    if (!flyTo) return;
+    frameRef.current?.contentWindow?.postMessage(
+      { type: "setPin", lat: flyTo.lat, lng: flyTo.lng },
+      "*"
+    );
+  }, [flyTo]);
 
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
@@ -98,6 +127,7 @@ export default function PinMap({
   return (
     <View style={styles.box}>
       {createElement("iframe", {
+        ref: frameRef,
         srcDoc: html,
         style: { width: "100%", height: "100%", border: "none" },
       })}

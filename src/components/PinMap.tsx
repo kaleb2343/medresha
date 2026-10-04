@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 import { colors } from "../theme";
@@ -9,6 +9,7 @@ type Props = {
   lat?: number | null;
   lng?: number | null;
   readOnly?: boolean;
+  flyTo?: { lat: number; lng: number; id: number } | null;
 };
 
 function buildHtml(lat: number | null, lng: number | null, readOnly: boolean) {
@@ -50,6 +51,16 @@ function buildHtml(lat: number | null, lng: number | null, readOnly: boolean) {
     marker = L.marker([${centerLat}, ${centerLng}], { icon: pinIcon }).addTo(map);
   }
 
+  function setPin(lat, lng) {
+    var ll = L.latLng(lat, lng);
+    if (marker) {
+      marker.setLatLng(ll);
+    } else {
+      marker = L.marker(ll, { icon: pinIcon }).addTo(map);
+    }
+    map.setView(ll, 18);
+  }
+
   map.on("click", function (e) {
     if (readOnly) {
       return;
@@ -74,11 +85,21 @@ export default function PinMap({
   lat = null,
   lng = null,
   readOnly = false,
+  flyTo = null,
 }: Props) {
+  const webRef = useRef<WebView>(null);
+
   const source = useMemo(
     () => ({ html: buildHtml(lat, lng, readOnly) }),
     [lat, lng, readOnly]
   );
+
+  useEffect(() => {
+    if (!flyTo) return;
+    webRef.current?.injectJavaScript(
+      `setPin(${flyTo.lat}, ${flyTo.lng}); true;`
+    );
+  }, [flyTo]);
 
   function handleMessage(event: WebViewMessageEvent) {
     if (readOnly || !onPick) return;
@@ -93,6 +114,7 @@ export default function PinMap({
   return (
     <View style={styles.box}>
       <WebView
+        ref={webRef}
         originWhitelist={["*"]}
         source={source}
         onMessage={handleMessage}
