@@ -1,6 +1,6 @@
 import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, Share, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import PinMap from "../../components/PinMap";
 import { Place, deletePlace, getPlace, toggleDone } from "../../store";
@@ -34,6 +34,27 @@ export default function PlaceDetailsScreen() {
     }
     await deletePlace(place.id);
     router.back();
+  }
+
+  async function handleShare() {
+    if (place === null) return;
+    let message = place.name;
+    if (place.note !== "") {
+      message += "\n" + place.note;
+    }
+    if (typeof place.lat === "number" && typeof place.lng === "number") {
+      message +=
+        "\nhttps://www.google.com/maps?q=" +
+        place.lat.toFixed(6) +
+        "," +
+        place.lng.toFixed(6);
+    }
+    message += "\n\nSaved with Medresha";
+    try {
+      await Share.share({ message });
+    } catch {
+      // the person closed the share menu or sharing is not possible
+    }
   }
 
   if (!loaded) {
@@ -75,6 +96,10 @@ export default function PlaceDetailsScreen() {
       ) : (
         <Text style={styles.noPin}>No pin saved for this place.</Text>
       )}
+
+      <Pressable style={styles.shareButton} onPress={handleShare}>
+        <Text style={styles.shareText}>Share place</Text>
+      </Pressable>
 
       <Pressable style={styles.doneButton} onPress={handleToggleDone}>
         <Text style={styles.buttonText}>
@@ -123,7 +148,7 @@ const styles = StyleSheet.create({
   },
   mapBox: {
     flex: 1,
-    minHeight: 220,
+    minHeight: 200,
     marginBottom: 16,
   },
   done: {
@@ -132,6 +157,19 @@ const styles = StyleSheet.create({
   },
   pending: {
     color: colors.pending,
+    fontWeight: "600",
+  },
+  shareButton: {
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    borderRadius: 10,
+    padding: 14,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  shareText: {
+    color: colors.primary,
+    fontSize: 17,
     fontWeight: "600",
   },
   doneButton: {
