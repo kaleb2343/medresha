@@ -54,6 +54,26 @@ export default function PlaceDetailsScreen() {
     }
   }
 
+  async function handleOpenMaps() {
+    if (
+      place === null ||
+      typeof place.lat !== "number" ||
+      typeof place.lng !== "number"
+    ) {
+      return;
+    }
+    const url =
+      "https://www.google.com/maps?q=" +
+      place.lat.toFixed(6) +
+      "," +
+      place.lng.toFixed(6);
+    try {
+      await Linking.openURL(url);
+    } catch {
+      // the phone could not open the map
+    }
+  }
+
   async function handleShare() {
     if (place === null) return;
     let message = place.name;
@@ -123,12 +143,17 @@ export default function PlaceDetailsScreen() {
 
       <View style={styles.actionRow}>
         {hasPhone && (
-          <Pressable style={styles.callButton} onPress={handleCall}>
-            <Text style={styles.callText}>Call</Text>
+          <Pressable style={styles.smallButton} onPress={handleCall}>
+            <Text style={styles.smallText}>Call</Text>
           </Pressable>
         )}
-        <Pressable style={styles.shareButton} onPress={handleShare}>
-          <Text style={styles.shareText}>Share place</Text>
+        {hasPin && (
+          <Pressable style={styles.smallButton} onPress={handleOpenMaps}>
+            <Text style={styles.smallText}>Maps</Text>
+          </Pressable>
+        )}
+        <Pressable style={styles.smallButton} onPress={handleShare}>
+          <Text style={styles.smallText}>Share</Text>
         </Pressable>
       </View>
 
@@ -201,21 +226,7 @@ const styles = StyleSheet.create({
     gap: 10,
     marginBottom: 10,
   },
-  callButton: {
-    flex: 1,
-    backgroundColor: colors.card,
-    borderWidth: 1.5,
-    borderColor: colors.primary,
-    borderRadius: 10,
-    padding: 14,
-    alignItems: "center",
-  },
-  callText: {
-    color: colors.primary,
-    fontSize: 17,
-    fontWeight: "600",
-  },
-  shareButton: {
+  smallButton: {
     flex: 1,
     borderWidth: 1.5,
     borderColor: colors.primary,
@@ -223,7 +234,7 @@ const styles = StyleSheet.create({
     padding: 14,
     alignItems: "center",
   },
-  shareText: {
+  smallText: {
     color: colors.primary,
     fontSize: 17,
     fontWeight: "600",
