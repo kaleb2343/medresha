@@ -23,16 +23,34 @@ export default function HomeScreen() {
 
   const pendingCount = places.filter((place) => !place.done).length;
   const doneCount = places.length - pendingCount;
+  const hasAnyPin = places.some(
+    (place) => typeof place.lat === "number" && typeof place.lng === "number"
+  );
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + 24 }]}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      <Text style={styles.brand}>MEDRESHA · መድረሻ</Text>
-      <Text style={styles.title}>My Places</Text>
-      <Text style={styles.subtitle}>
-        Save the exact door. Find it again anytime.
-      </Text>
+      <View style={styles.headerRow}>
+        <View>
+          <Text style={styles.brand}>MEDRESHA · መድረሻ</Text>
+          <Text style={styles.title}>My Places</Text>
+        </View>
+        {hasAnyPin && (
+          <Pressable
+            style={styles.mapButton}
+            onPress={() => router.push("/map")}
+          >
+            <Text style={styles.mapButtonText}>Map</Text>
+          </Pressable>
+        )}
+      </View>
+
+      {places.length === 0 && (
+        <Text style={styles.subtitle}>
+          Save the exact door. Find it again anytime.
+        </Text>
+      )}
 
       <FlatList
         data={places}
@@ -106,25 +124,42 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
   brand: {
     fontSize: 13,
     fontWeight: "600",
     letterSpacing: 1.5,
     color: colors.mutedText,
-    paddingHorizontal: 20,
   },
   title: {
     fontSize: 28,
     fontWeight: "bold",
     color: colors.primary,
-    paddingHorizontal: 20,
     marginTop: 4,
+  },
+  mapButton: {
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    backgroundColor: colors.card,
+  },
+  mapButtonText: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: "600",
   },
   subtitle: {
     fontSize: 15,
     color: colors.mutedText,
     paddingHorizontal: 20,
-    marginTop: 4,
     marginBottom: 16,
   },
   list: {
