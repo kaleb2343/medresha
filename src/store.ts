@@ -54,6 +54,21 @@ export async function addPlace(
   await savePlaces([newPlace, ...current]);
 }
 
+export async function updatePlace(
+  id: string,
+  name: string,
+  note: string,
+  lat: number | null,
+  lng: number | null,
+  phone: string = ""
+): Promise<void> {
+  const current = await getPlaces();
+  const updated = current.map((place) =>
+    place.id === id ? { ...place, name, note, lat, lng, phone } : place
+  );
+  await savePlaces(updated);
+}
+
 export async function toggleDone(id: string): Promise<void> {
   const current = await getPlaces();
   const updated = current.map((place) =>

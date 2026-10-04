@@ -1,6 +1,6 @@
 import * as Location from "expo-location";
-import { Stack, router } from "expo-router";
-import { useState } from "react";
+import { Stack, router, useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Pressable,
@@ -11,10 +11,13 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import PinMap from "../components/PinMap";
-import { addPlace } from "../store";
+import { addPlace, getPlace, updatePlace } from "../store";
 import { colors } from "../theme";
 
 export default function AddPlaceScreen() {
+  const { edit } = useLocalSearchParams<{ edit?: string }>();
+  const isEdit = typeof edit === "string" && edit !== "";
+
   const [name, setName] = useState("");
   const [note, setNote] = useState("");
   const [phone, setPhone] = useState("");
@@ -23,12 +26,34 @@ export default function AddPlaceScreen() {
   const [error, setError] = useState("");
   const [locating, setLocating] = useState(false);
   const [accuracy, setAccuracy] = useState<number | null>(null);
+  const [ready, setReady] = useState(!isEdit);
+  const [initialPin, setInitialPin] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [flyTo, setFlyTo] = useState<{
     lat: number;
     lng: number;
     id: number;
   } | null>(null);
   const insets = useSafeAreaInsets();
+
+  useEffect(() => {
+    if (!edit) return;
+    getPlace(edit).then((found) => {
+      if (found) {
+        setName(found.name);
+        setNote(found.note);
+        setPhone(found.phone ?? "");
+        if (typeof found.lat === "number" && typeof found.lng === "number") {
+          setLat(found.lat);
+          setLng(found.lng);
+          setInitialPin({ lat: found.lat, lng: found.lng });
+        }
+      }
+      setReady(true);
+    });
+  }, [edit]);
 
   function handlePick(newLat: number, newLng: number) {
     setLat(newLat);
@@ -70,7 +95,11 @@ export default function AddPlaceScreen() {
       setError("Please tap the map or use your location to drop a pin.");
       return;
     }
-    await addPlace(name.trim(), note.trim(), lat, lng, phone.trim());
+    if (isEdit && edit) {
+      await updatePlace(edit, name.trim(), note.trim(), lat, lng, phone.trim());
+    } else {
+      await addPlace(name.trim(), note.trim(), lat, lng, phone.trim());
+    }
     router.back();
   }
 
@@ -78,7 +107,7 @@ export default function AddPlaceScreen() {
     <View
       style={[styles.container, { paddingBottom: 20 + insets.bottom }]}
     >
-      <Stack.Screen options={{ title: "Add place" }} />
+      <Stack.Screen options={{ title: isEdit ? "Edit place" : "Add place" }} />
 
       <Text style={styles.label}>Name</Text>
       <TextInput
@@ -126,7 +155,16 @@ export default function AddPlaceScreen() {
         )}
       </Pressable>
 
-      <PinMap onPick={handlePick} flyTo={flyTo} />
+      {ready ? (
+        <PinMap
+          onPick={handlePick}
+          flyTo={flyTo}
+          lat={initialPin ? initialPin.lat : null}
+          lng={initialPin ? initialPin.lng : null}
+        />
+      ) : (
+        <View style={styles.mapWaiting} />
+      )}
 
       {lat !== null && <Text style={styles.pinSet}>Pin dropped</Text>}
       {accuracy !== null && (
@@ -191,6 +229,12 @@ const styles = StyleSheet.create({
     color: colors.primary,
     fontSize: 16,
     fontWeight: "600",
+  },
+  mapWaiting: {
+    flex: 1,
+    minHeight: 180,
+    borderRadius: 12,
+    backgroundColor: colors.card,
   },
   pinSet: {
     color: colors.done,

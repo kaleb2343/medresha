@@ -1,5 +1,10 @@
-import { Stack, router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import {
+  Stack,
+  router,
+  useFocusEffect,
+  useLocalSearchParams,
+} from "expo-router";
+import { useCallback, useState } from "react";
 import {
   Linking,
   Pressable,
@@ -20,12 +25,14 @@ export default function PlaceDetailsScreen() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const insets = useSafeAreaInsets();
 
-  useEffect(() => {
-    getPlace(id).then((found) => {
-      setPlace(found);
-      setLoaded(true);
-    });
-  }, [id]);
+  useFocusEffect(
+    useCallback(() => {
+      getPlace(id).then((found) => {
+        setPlace(found);
+        setLoaded(true);
+      });
+    }, [id])
+  );
 
   async function handleToggleDone() {
     if (place === null) return;
@@ -41,6 +48,11 @@ export default function PlaceDetailsScreen() {
     }
     await deletePlace(place.id);
     router.back();
+  }
+
+  function handleEdit() {
+    if (place === null) return;
+    router.push({ pathname: "/add", params: { edit: place.id } });
   }
 
   async function handleCall() {
@@ -118,7 +130,16 @@ export default function PlaceDetailsScreen() {
     <View
       style={[styles.container, { paddingBottom: 20 + insets.bottom }]}
     >
-      <Stack.Screen options={{ title: "Place details" }} />
+      <Stack.Screen
+        options={{
+          title: "Place details",
+          headerRight: () => (
+            <Pressable onPress={handleEdit} hitSlop={12}>
+              <Text style={styles.editText}>Edit</Text>
+            </Pressable>
+          ),
+        }}
+      />
 
       <View style={styles.headerRow}>
         <Text style={styles.name}>{place.name}</Text>
@@ -178,6 +199,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     paddingHorizontal: 20,
     paddingTop: 20,
+  },
+  editText: {
+    color: colors.onPrimary,
+    fontSize: 17,
+    fontWeight: "600",
   },
   headerRow: {
     flexDirection: "row",
