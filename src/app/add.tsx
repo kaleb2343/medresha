@@ -3,8 +3,10 @@ import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Keyboard,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -14,6 +16,20 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import PinMap from "../components/PinMap";
 import { addPlace, getPlace, updatePlace } from "../store";
 import { colors } from "../theme";
+
+type SearchResult = {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+};
+
+type RawResult = {
+  place_id: number | string;
+  display_name: string;
+  lat: string;
+  lon: string;
+};
 
 export default function AddPlaceScreen() {
   const { edit } = useLocalSearchParams<{ edit?: string }>();
@@ -42,6 +58,15 @@ export default function AddPlaceScreen() {
     lng: number;
     id: number;
   } | null>(null);
+  const [moveTo, setMoveTo] = useState<{
+    lat: number;
+    lng: number;
+    id: number;
+  } | null>(null);
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [searching, setSearching] = useState(false);
+  const [searchMessage, setSearchMessage] = useState("");
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -92,8 +117,61 @@ export default function AddPlaceScreen() {
     }
   }
 
+  async function handleSearch() {
+    const text = query.trim();
+    if (text === "") return;
+    Keyboard.dismiss();
+    setSearching(true);
+    setSearchMessage("");
+    setResults([]);
+    try {
+      const url =
+        "https://nominatim.openstreetmap.org/search?format=json&limit=5" +
+        "&countrycodes=et&accept-language=en,am" +
+        "&viewbox=38.60,9.15,38.95,8.85&bounded=0" +
+        "&q=" +
+        encodeURIComponent(text);
+      const response = await fetch(url, {
+        headers: {
+          "User-Agent": "Medresha/1.0 (Android app, kalebdawit)",
+          Accept: "application/json",
+        },
+      });
+      if (!response.ok) {
+        throw new Error("Search failed");
+      }
+      const data = (await response.json()) as RawResult[];
+      const found: SearchResult[] = (Array.isArray(data) ? data : [])
+        .map((item) => ({
+          id: String(item.place_id),
+          name: String(item.display_name),
+          lat: parseFloat(item.lat),
+          lng: parseFloat(item.lon),
+        }))
+        .filter((item) => !isNaN(item.lat) && !isNaN(item.lng));
+      if (found.length === 0) {
+        setSearchMessage(
+          "Nothing found. Try another word, or move the map by hand."
+        );
+      }
+      setResults(found);
+    } catch {
+      setSearchMessage("Search failed. Check your internet and try again.");
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  function handlePickResult(item: SearchResult) {
+    setMoveTo({ lat: item.lat, lng: item.lng, id: Date.now() });
+    setResults([]);
+    setSearchMessage("Now tap the exact door on the map.");
+  }
+
   function openFullMap() {
     setError("");
+    setResults([]);
+    setSearchMessage("");
     if (lat !== null && lng !== null) {
       setFullStart({ lat, lng });
     } else {
@@ -104,6 +182,9 @@ export default function AddPlaceScreen() {
 
   function closeFullMap() {
     setFullMap(false);
+    setMoveTo(null);
+    setResults([]);
+    setSearchMessage("");
     if (lat !== null && lng !== null) {
       setFlyTo({ lat, lng, id: Date.now() });
     }
@@ -230,11 +311,56 @@ export default function AddPlaceScreen() {
             },
           ]}
         >
-          <Text style={styles.fullTitle}>Tap the exact door</Text>
+          <View style={styles.searchRow}>
+            <TextInput
+              style={[styles.input, styles.searchInput]}
+              placeholder="Search a street or landmark"
+              placeholderTextColor={colors.mutedText}
+              value={query}
+              onChangeText={setQuery}
+              returnKeyType="search"
+              onSubmitEditing={handleSearch}
+            />
+            <Pressable
+              style={[styles.searchButton, searching && styles.buttonBusy]}
+              onPress={handleSearch}
+              disabled={searching}
+            >
+              {searching ? (
+                <ActivityIndicator color={colors.primary} />
+              ) : (
+                <Text style={styles.mapActionText}>Search</Text>
+              )}
+            </Pressable>
+          </View>
+
+          {searchMessage !== "" && (
+            <Text style={styles.searchMessage}>{searchMessage}</Text>
+          )}
+
+          {results.length > 0 && (
+            <ScrollView
+              style={styles.resultsBox}
+              keyboardShouldPersistTaps="handled"
+            >
+              {results.map((item) => (
+                <Pressable
+                  key={item.id}
+                  style={styles.resultItem}
+                  onPress={() => handlePickResult(item)}
+                >
+                  <Text style={styles.resultText} numberOfLines={2}>
+                    {item.name}
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          )}
 
           <PinMap
             onPick={handlePick}
             flyTo={flyTo}
+            moveTo={moveTo}
             lat={fullStart ? fullStart.lat : null}
             lng={fullStart ? fullStart.lng : null}
           />
@@ -357,11 +483,45 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
     paddingHorizontal: 16,
   },
-  fullTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: colors.primary,
+  searchRow: {
+    flexDirection: "row",
+    gap: 8,
     marginBottom: 10,
+  },
+  searchInput: {
+    flex: 1,
+  },
+  searchButton: {
+    borderWidth: 1.5,
+    borderColor: colors.primary,
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 92,
+  },
+  searchMessage: {
+    color: colors.mutedText,
+    fontSize: 14,
+    marginBottom: 8,
+  },
+  resultsBox: {
+    maxHeight: 190,
+    flexGrow: 0,
+    backgroundColor: colors.card,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.inputBorder,
+    marginBottom: 10,
+  },
+  resultItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.inputBorder,
+  },
+  resultText: {
+    fontSize: 14,
+    color: colors.text,
   },
   fullButtons: {
     flexDirection: "row",

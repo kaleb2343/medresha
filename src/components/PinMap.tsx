@@ -10,6 +10,7 @@ type Props = {
   lng?: number | null;
   readOnly?: boolean;
   flyTo?: { lat: number; lng: number; id: number } | null;
+  moveTo?: { lat: number; lng: number; id: number } | null;
 };
 
 function buildHtml(lat: number | null, lng: number | null, readOnly: boolean) {
@@ -113,6 +114,7 @@ export default function PinMap({
   lng = null,
   readOnly = false,
   flyTo = null,
+  moveTo = null,
 }: Props) {
   const webRef = useRef<WebView>(null);
 
@@ -127,6 +129,13 @@ export default function PinMap({
       `setPin(${flyTo.lat}, ${flyTo.lng}); true;`
     );
   }, [flyTo]);
+
+  useEffect(() => {
+    if (!moveTo) return;
+    webRef.current?.injectJavaScript(
+      `map.setView([${moveTo.lat}, ${moveTo.lng}], 17); true;`
+    );
+  }, [moveTo]);
 
   function handleMessage(event: WebViewMessageEvent) {
     if (readOnly || !onPick) return;
