@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 import { Place } from "../store";
@@ -8,6 +8,8 @@ import { LEAFLET_CSS, LEAFLET_JS } from "./leafletAssets";
 type Props = {
   places: Place[];
   onOpen: (id: string) => void;
+  me?: { lat: number; lng: number; id: number } | null;
+  fitId?: number;
 };
 
 function buildHtml(places: Place[]) {
@@ -117,19 +119,51 @@ function buildHtml(places: Place[]) {
     bounds.push([p.lat, p.lng]);
   });
 
-  if (bounds.length === 1) {
-    map.setView(bounds[0], 16);
-  } else if (bounds.length > 1) {
-    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 17 });
+  function fitAll() {
+    if (bounds.length === 1) {
+      map.setView(bounds[0], 16);
+    } else if (bounds.length > 1) {
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 17 });
+    }
   }
+
+  var meMarker = null;
+  function showMe(lat, lng) {
+    var ll = L.latLng(lat, lng);
+    if (meMarker) {
+      meMarker.setLatLng(ll);
+    } else {
+      meMarker = L.circleMarker(ll, {
+        radius: 9,
+        color: "#FFFFFF",
+        weight: 3,
+        fillColor: "#1A73E8",
+        fillOpacity: 1
+      }).addTo(map);
+    }
+    map.setView(ll, 16);
+  }
+
+  fitAll();
 </script>
 </body>
 </html>
 `;
 }
 
-export default function AllMap({ places, onOpen }: Props) {
+export default function AllMap({ places, onOpen, me = null, fitId = 0 }: Props) {
+  const webRef = useRef<WebView>(null);
   const source = useMemo(() => ({ html: buildHtml(places) }), [places]);
+
+  useEffect(() => {
+    if (!me) return;
+    webRef.current?.injectJavaScript(`showMe(${me.lat}, ${me.lng}); true;`);
+  }, [me]);
+
+  useEffect(() => {
+    if (!fitId) return;
+    webRef.current?.injectJavaScript("fitAll(); true;");
+  }, [fitId]);
 
   function handleMessage(event: WebViewMessageEvent) {
     try {
@@ -145,6 +179,7 @@ export default function AllMap({ places, onOpen }: Props) {
   return (
     <View style={styles.box}>
       <WebView
+        ref={webRef}
         originWhitelist={["*"]}
         source={source}
         onMessage={handleMessage}
