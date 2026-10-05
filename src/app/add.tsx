@@ -3,6 +3,7 @@ import { Stack, router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Modal,
   Pressable,
   StyleSheet,
   Text,
@@ -27,6 +28,11 @@ export default function AddPlaceScreen() {
   const [locating, setLocating] = useState(false);
   const [accuracy, setAccuracy] = useState<number | null>(null);
   const [ready, setReady] = useState(!isEdit);
+  const [fullMap, setFullMap] = useState(false);
+  const [fullStart, setFullStart] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
   const [initialPin, setInitialPin] = useState<{
     lat: number;
     lng: number;
@@ -83,6 +89,23 @@ export default function AddPlaceScreen() {
       setError("Could not get your location. Turn on GPS and try again.");
     } finally {
       setLocating(false);
+    }
+  }
+
+  function openFullMap() {
+    setError("");
+    if (lat !== null && lng !== null) {
+      setFullStart({ lat, lng });
+    } else {
+      setFullStart(null);
+    }
+    setFullMap(true);
+  }
+
+  function closeFullMap() {
+    setFullMap(false);
+    if (lat !== null && lng !== null) {
+      setFlyTo({ lat, lng, id: Date.now() });
     }
   }
 
@@ -143,17 +166,26 @@ export default function AddPlaceScreen() {
 
       <Text style={styles.label}>Tap the map to drop a pin</Text>
 
-      <Pressable
-        style={[styles.locationButton, locating && styles.locationButtonBusy]}
-        onPress={handleUseLocation}
-        disabled={locating}
-      >
-        {locating ? (
-          <ActivityIndicator color={colors.primary} />
-        ) : (
-          <Text style={styles.locationButtonText}>Use my location</Text>
-        )}
-      </Pressable>
+      <View style={styles.buttonRow}>
+        <Pressable
+          style={[styles.mapActionButton, locating && styles.buttonBusy]}
+          onPress={handleUseLocation}
+          disabled={locating}
+        >
+          {locating ? (
+            <ActivityIndicator color={colors.primary} />
+          ) : (
+            <Text style={styles.mapActionText}>Use my location</Text>
+          )}
+        </Pressable>
+        <Pressable
+          style={[styles.mapActionButton, !ready && styles.buttonBusy]}
+          onPress={openFullMap}
+          disabled={!ready}
+        >
+          <Text style={styles.mapActionText}>Full screen</Text>
+        </Pressable>
+      </View>
 
       {ready ? (
         <PinMap
@@ -181,6 +213,57 @@ export default function AddPlaceScreen() {
       <Pressable style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>Save</Text>
       </Pressable>
+
+      <Modal
+        visible={fullMap}
+        animationType="slide"
+        onRequestClose={closeFullMap}
+        statusBarTranslucent
+        navigationBarTranslucent
+      >
+        <View
+          style={[
+            styles.fullContainer,
+            {
+              paddingTop: insets.top + 12,
+              paddingBottom: 12 + insets.bottom,
+            },
+          ]}
+        >
+          <Text style={styles.fullTitle}>Tap the exact door</Text>
+
+          <PinMap
+            onPick={handlePick}
+            flyTo={flyTo}
+            lat={fullStart ? fullStart.lat : null}
+            lng={fullStart ? fullStart.lng : null}
+          />
+
+          {accuracy !== null && (
+            <Text style={styles.accuracyText}>
+              Accuracy: about {Math.round(accuracy)} m
+            </Text>
+          )}
+          {error !== "" && <Text style={styles.errorText}>{error}</Text>}
+
+          <View style={styles.fullButtons}>
+            <Pressable
+              style={[styles.mapActionButton, locating && styles.buttonBusy]}
+              onPress={handleUseLocation}
+              disabled={locating}
+            >
+              {locating ? (
+                <ActivityIndicator color={colors.primary} />
+              ) : (
+                <Text style={styles.mapActionText}>My location</Text>
+              )}
+            </Pressable>
+            <Pressable style={styles.doneButton} onPress={closeFullMap}>
+              <Text style={styles.doneButtonText}>Done</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -212,20 +295,25 @@ const styles = StyleSheet.create({
     height: 70,
     textAlignVertical: "top",
   },
-  locationButton: {
+  buttonRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 10,
+  },
+  mapActionButton: {
+    flex: 1,
     borderWidth: 1.5,
     borderColor: colors.primary,
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 10,
     minHeight: 46,
   },
-  locationButtonBusy: {
+  buttonBusy: {
     opacity: 0.6,
   },
-  locationButtonText: {
+  mapActionText: {
     color: colors.primary,
     fontSize: 16,
     fontWeight: "600",
@@ -260,6 +348,36 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   saveButtonText: {
+    color: colors.onPrimary,
+    fontSize: 17,
+    fontWeight: "600",
+  },
+  fullContainer: {
+    flex: 1,
+    backgroundColor: colors.background,
+    paddingHorizontal: 16,
+  },
+  fullTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: colors.primary,
+    marginBottom: 10,
+  },
+  fullButtons: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 12,
+  },
+  doneButton: {
+    flex: 1,
+    backgroundColor: colors.primary,
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 46,
+  },
+  doneButtonText: {
     color: colors.onPrimary,
     fontSize: 17,
     fontWeight: "600",

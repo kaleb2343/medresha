@@ -20,10 +20,24 @@ function buildHtml(lat: number | null, lng: number | null, readOnly: boolean) {
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <style>${LEAFLET_CSS}</style>
 <style>
   html, body, #map { height: 100%; margin: 0; padding: 0; }
+  body { touch-action: none; -webkit-user-select: none; user-select: none; }
+  .leaflet-touch .leaflet-bar a {
+    width: 48px !important;
+    height: 48px !important;
+    line-height: 48px !important;
+  }
+  .leaflet-touch .leaflet-control-zoom-in,
+  .leaflet-touch .leaflet-control-zoom-out {
+    font-size: 26px !important;
+  }
+  .leaflet-control-zoom {
+    margin-left: 12px !important;
+    margin-top: 12px !important;
+  }
 </style>
 </head>
 <body>
@@ -31,7 +45,12 @@ function buildHtml(lat: number | null, lng: number | null, readOnly: boolean) {
 <script>${LEAFLET_JS}</script>
 <script>
   var readOnly = ${readOnly};
-  var map = L.map("map").setView([${centerLat}, ${centerLng}], ${zoom});
+  var map = L.map("map", {
+    bounceAtZoomLimits: false,
+    touchZoom: true,
+    dragging: true,
+    doubleClickZoom: true
+  }).setView([${centerLat}, ${centerLng}], ${zoom});
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
     attribution: "&copy; OpenStreetMap contributors"
