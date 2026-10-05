@@ -51,10 +51,18 @@ function buildHtml(lat: number | null, lng: number | null, readOnly: boolean) {
     bounceAtZoomLimits: false,
     touchZoom: true,
     dragging: true,
-    doubleClickZoom: true
+    doubleClickZoom: true,
+    zoomAnimation: false,
+    fadeAnimation: false,
+    markerZoomAnimation: false,
+    inertiaDeceleration: 6000
   }).setView([${centerLat}, ${centerLng}], ${zoom});
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
+    updateWhenIdle: false,
+    updateWhenZooming: false,
+    updateInterval: 100,
+    keepBuffer: 4,
     attribution: "&copy; OpenStreetMap contributors"
   }).addTo(map);
 
@@ -138,6 +146,10 @@ export default function PinMap({
         source={source}
         onMessage={handleMessage}
         style={styles.webview}
+        androidLayerType="hardware"
+        cacheEnabled
+        cacheMode="LOAD_CACHE_ELSE_NETWORK"
+        overScrollMode="never"
         startInLoadingState
         renderLoading={() => (
           <View style={styles.loading}>

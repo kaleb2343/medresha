@@ -30,10 +30,24 @@ function buildHtml(places: Place[]) {
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <style>${LEAFLET_CSS}</style>
 <style>
   html, body, #map { height: 100%; margin: 0; padding: 0; }
+  body { touch-action: none; -webkit-user-select: none; user-select: none; }
+  .leaflet-touch .leaflet-bar a {
+    width: 48px !important;
+    height: 48px !important;
+    line-height: 48px !important;
+  }
+  .leaflet-touch .leaflet-control-zoom-in,
+  .leaflet-touch .leaflet-control-zoom-out {
+    font-size: 26px !important;
+  }
+  .leaflet-control-zoom {
+    margin-left: 12px !important;
+    margin-top: 12px !important;
+  }
 </style>
 </head>
 <body>
@@ -41,9 +55,19 @@ function buildHtml(places: Place[]) {
 <script>${LEAFLET_JS}</script>
 <script>
   var places = ${json};
-  var map = L.map("map").setView([9.03, 38.74], 12);
+  var map = L.map("map", {
+    bounceAtZoomLimits: false,
+    zoomAnimation: false,
+    fadeAnimation: false,
+    markerZoomAnimation: false,
+    inertiaDeceleration: 6000
+  }).setView([9.03, 38.74], 12);
   L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 19,
+    updateWhenIdle: false,
+    updateWhenZooming: false,
+    updateInterval: 100,
+    keepBuffer: 4,
     attribution: "&copy; OpenStreetMap contributors"
   }).addTo(map);
 
@@ -125,6 +149,10 @@ export default function AllMap({ places, onOpen }: Props) {
         source={source}
         onMessage={handleMessage}
         style={styles.webview}
+        androidLayerType="hardware"
+        cacheEnabled
+        cacheMode="LOAD_CACHE_ELSE_NETWORK"
+        overScrollMode="never"
         startInLoadingState
         renderLoading={() => (
           <View style={styles.loading}>
