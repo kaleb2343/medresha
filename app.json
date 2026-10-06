@@ -7,9 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "deliverypin",
     "userInterfaceStyle": "light",
-    "ios": {
-      "icon": "./assets/expo.icon"
-    },
     "android": {
       "package": "com.kalebdawit.medresha",
       "adaptiveIcon": {
@@ -30,7 +27,7 @@
         {
           "backgroundColor": "#7F011F",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 200
         }
       ],
       [
