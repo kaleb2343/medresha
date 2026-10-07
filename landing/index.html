@@ -9,6 +9,9 @@
   <meta property="og:description" content="A free notebook with a map for delivery people in Addis Ababa. Drop a pin, write a note, find it again." />
   <meta property="og:type" content="website" />
   <meta name="theme-color" content="#7F011F" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="favicon.png" type="image/png" sizes="96x96" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+Ethiopic:wght@500;700&display=swap" rel="stylesheet" />
@@ -155,14 +158,12 @@
   </style>
 </head>
 <body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="logo" viewBox="140 144 348 350"><g fill="#7F011F" stroke="#7F011F" stroke-width="6" stroke-linejoin="round"><polygon points="146,150 304,240 236,286 236,422 154,486 146,480"/><polygon points="482,150 324,240 392,286 392,422 474,486 482,480"/></g><g fill="#7F011F"><path fill-rule="evenodd" d="M268,423 V334 A46,46 0 0 1 360,334 V423 Z M351,368 a15,15 0 1 0 -30,0 a15,15 0 1 0 30,0 Z"/><polygon points="264,434 364,434 410,487 218,487"/></g></symbol></svg>
 
   <header>
     <div class="wrap nav">
       <a class="brand" href="#top">
-        <svg width="26" height="34" viewBox="0 0 34 44" aria-hidden="true">
-          <path d="M17 0C7.6 0 0 7.6 0 17c0 12.5 17 27 17 27s17-14.5 17-27C34 7.6 26.4 0 17 0z" fill="#7F011F"/>
-          <circle cx="17" cy="17" r="7" fill="#F5EBD0"/>
-        </svg>
+        <svg width="34" height="34" aria-hidden="true"><use href="#logo"/></svg>
         Medresha
       </a>
       <a class="btn small" href="#download">Download</a>
@@ -182,7 +183,7 @@
           <a class="btn" href="https://github.com/kaleb2343/medresha/releases/latest/download/medresha.apk">Download for Android</a>
           <a class="btn ghost" href="#how">How it works</a>
         </div>
-        <div class="meta">Free · No account · Android only · about 24 MB</div>
+        <div class="meta">Free · No account · Android only · about 23 MB</div>
       </div>
 
       <div class="phone-wrap">
@@ -285,6 +286,7 @@
 
   <footer>
     <div class="wrap">
+      <svg width="44" height="44" aria-hidden="true" style="margin-bottom:8px"><use href="#logo"/></svg>
       <p>© 2026 Kaleb Dawit. All rights reserved.</p>
       <p>Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · <a href="https://github.com/kaleb2343/medresha">Code on GitHub</a></p>
     </div>
