@@ -15,158 +15,198 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+Ethiopic:wght@500;700&display=swap" rel="stylesheet" />
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem("medresha-theme"); } catch (e) {}
+      if (!t) t = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "night" : "day";
+      document.documentElement.setAttribute("data-theme", t);
+    })();
+  </script>
   <style>
     :root {
-      --wine: #7F011F;
-      --wine-dark: #5E0117;
-      --sand: #F5EBD0;
-      --card: #FFFBF2;
-      --ink: #2B0A12;
-      --muted: #7A5C61;
-      --line: #E3D5B0;
-      --done: #2E7D4F;
-      --pending: #B45309;
+      --wine: #7F011F; --bg: #F5EBD0; --card: #FFFBF2; --alt: rgba(255,251,242,.88);
+      --ink: #2B0A12; --muted: #7A5C61; --line: #E3D5B0; --head: #7F011F;
+      --btn: #7F011F; --btn-h: #5E0117; --btn-ink: #F5EBD0;
+      --road: rgba(127,1,31,.13); --road-main: rgba(127,1,31,.24); --block: rgba(127,1,31,.05);
+      --light: transparent; --edge: #2B0A12; --done: #2E7D4F; --pending: #B45309;
+    }
+    [data-theme="night"] {
+      --bg: #0B0709; --card: #170B10; --alt: rgba(23,11,16,.86);
+      --ink: #F5EBD0; --muted: #B79CA2; --line: #341822; --head: #F5EBD0;
+      --btn: #9A0B2D; --btn-h: #B3123A; --btn-ink: #F5EBD0;
+      --road: rgba(245,235,208,.10); --road-main: rgba(255,200,120,.32); --block: rgba(245,235,208,.035);
+      --light: #FFD28A; --edge: #2E1B22; --done: #5FD08A; --pending: #F0A64A;
     }
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
-      margin: 0;
-      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: var(--sand);
-      color: var(--ink);
-      line-height: 1.6;
+      margin: 0; font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg); color: var(--ink); line-height: 1.6;
+      transition: background .5s, color .5s;
     }
     .am { font-family: "Noto Sans Ethiopic", "Inter", sans-serif; }
     a { color: inherit; }
     .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+    main, header, footer { position: relative; z-index: 1; }
+
+    /* Map background */
+    .map-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .map-bg svg { width: 100%; height: 100%; display: block; }
+    .map-bg .road { fill: none; stroke: var(--road); stroke-width: 3; stroke-linecap: round; }
+    .map-bg .main { fill: none; stroke: var(--road-main); stroke-width: 6; stroke-linecap: round; }
+    .map-bg .blk { fill: var(--block); }
+    .map-bg .lt { fill: var(--light); }
+    .map-bg::after {
+      content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .6s;
+      background: radial-gradient(900px 500px at 85% 100%, rgba(127,1,31,.35), transparent 70%),
+                  radial-gradient(700px 400px at 10% 0%, rgba(47,102,144,.10), transparent 70%);
+    }
+    [data-theme="night"] .map-bg::after { opacity: 1; }
 
     /* Header */
     header { padding: 18px 0; }
-    .nav { display: flex; align-items: center; justify-content: space-between; }
-    .brand {
-      display: flex; align-items: center; gap: 10px;
-      font-weight: 700; font-size: 20px;
-      color: var(--wine); text-decoration: none;
+    .nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; color: var(--head); text-decoration: none; }
+    .logo { color: var(--wine); } [data-theme="night"] .logo { color: var(--ink); }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .toggle {
+      border: 1.5px solid var(--line); background: var(--card); color: var(--ink);
+      border-radius: 999px; padding: 8px 14px; font: 600 14px "Inter", sans-serif; cursor: pointer;
     }
+    .toggle:hover { border-color: var(--head); }
 
-    /* Buttons */
     .btn {
-      display: inline-block;
-      background: var(--wine); color: var(--sand);
-      padding: 14px 26px; border-radius: 12px;
-      font-weight: 600; text-decoration: none;
+      display: inline-block; background: var(--btn); color: var(--btn-ink);
+      padding: 14px 26px; border-radius: 12px; font-weight: 600; text-decoration: none;
     }
-    .btn:hover { background: var(--wine-dark); }
+    .btn:hover { background: var(--btn-h); }
     .btn.small { padding: 9px 18px; font-size: 15px; }
-    .btn.ghost {
-      background: transparent; color: var(--wine);
-      border: 2px solid var(--wine);
-      padding: 12px 24px;
-    }
-    .btn.ghost:hover { background: var(--wine); color: var(--sand); }
+    .btn.ghost { background: transparent; color: var(--head); border: 2px solid var(--head); padding: 12px 24px; }
+    .btn.ghost:hover { background: var(--head); color: var(--bg); }
 
     /* Hero */
     .hero { display: grid; gap: 40px; padding: 36px 0 64px; align-items: center; }
     @media (min-width: 860px) { .hero { grid-template-columns: 1.1fr 0.9fr; } }
-    .eyebrow {
-      font-size: 13px; font-weight: 600; letter-spacing: 1.5px;
-      color: var(--muted); text-transform: uppercase;
-    }
-    h1 {
-      font-size: clamp(34px, 6vw, 56px);
-      line-height: 1.1; margin: 8px 0 16px; color: var(--wine);
-    }
+    .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; }
+    h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.1; margin: 8px 0 16px; color: var(--head); }
     .lead { font-size: 18px; color: var(--muted); max-width: 520px; margin: 0 0 24px; }
     .cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
     .meta { font-size: 14px; color: var(--muted); margin-top: 14px; }
 
-    /* Phone mock of the app home screen */
-    .phone-wrap { display: flex; justify-content: center; }
+    /* Live phone demo */
+    .phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
     .phone {
-      width: 280px;
-      border: 10px solid var(--ink);
-      border-radius: 38px;
-      background: var(--sand);
-      padding: 26px 16px 20px;
-      box-shadow: 0 24px 48px rgba(43, 10, 18, 0.25);
+      position: relative; width: 280px; height: 520px; border: 10px solid var(--edge); border-radius: 38px;
+      background: var(--card); overflow: hidden; cursor: pointer; outline-offset: 4px;
+      box-shadow: 0 24px 48px rgba(0,0,0,.28), 0 0 0 1px var(--line);
     }
+    [data-theme="night"] .phone { box-shadow: 0 0 60px rgba(255,200,120,.12), 0 0 0 1px var(--line); }
+    .screen { position: absolute; inset: 0; padding: 26px 14px 16px; opacity: 0; transform: translateY(8px); transition: opacity .45s, transform .45s; pointer-events: none; }
+    .screen.on { opacity: 1; transform: none; }
     .m-brand { font-size: 10px; letter-spacing: 1.4px; font-weight: 600; color: var(--muted); margin: 0; }
-    .m-title { font-size: 24px; font-weight: 700; color: var(--wine); margin: 2px 0 0; line-height: 1.2; }
-    .m-sub { font-size: 11px; color: var(--muted); margin: 2px 0 12px; }
+    .m-title { font-size: 22px; font-weight: 700; color: var(--head); margin: 2px 0 0; line-height: 1.2; }
+    .m-sub { font-size: 11px; color: var(--muted); margin: 2px 0 10px; }
     .m-stats { display: flex; gap: 8px; margin-bottom: 10px; }
-    .m-stat {
-      flex: 1; background: var(--card); border: 1px solid var(--line);
-      border-radius: 10px; padding: 8px 10px;
+    .m-stat { flex: 1; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; }
+    .m-stat b { display: block; font-size: 18px; } .m-stat span { font-size: 11px; color: var(--muted); }
+    .m-card { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; margin-bottom: 8px; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+    .m-card strong { font-size: 13px; display: block; } .m-card small { font-size: 11px; color: var(--muted); display: block; }
+    .m-card em { font-size: 10px; font-style: normal; color: var(--head); font-weight: 600; }
+    .tag-p { color: var(--pending); font-size: 11px; font-weight: 600; } .tag-d { color: var(--done); font-size: 11px; font-weight: 600; }
+    .m-card.hit { border-color: var(--head); box-shadow: 0 0 0 2px var(--head); }
+    .mini { width: 100%; height: 150px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); display: block; margin: 8px 0; }
+    .m-note { font-size: 12px; color: var(--muted); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+    .m-btns { display: flex; gap: 6px; margin-top: 10px; }
+    .m-btns span { flex: 1; text-align: center; font-size: 11px; font-weight: 600; padding: 8px 0; border-radius: 8px; background: var(--btn); color: var(--btn-ink); }
+    .full { width: calc(100% + 28px); height: 330px; margin: 8px -14px; display: block; background: var(--bg); }
+    .hint {
+      position: absolute; inset: auto 0 18px 0; text-align: center; z-index: 3; pointer-events: none;
     }
-    .m-stat b { display: block; font-size: 20px; }
-    .m-stat span { font-size: 11px; color: var(--muted); }
-    .m-card {
-      background: var(--card); border: 1px solid var(--line);
-      border-radius: 10px; padding: 10px 12px; margin-bottom: 8px;
-      display: flex; justify-content: space-between; gap: 8px; align-items: center;
+    .hint span { display: inline-block; background: var(--btn); color: var(--btn-ink); font-size: 12px; font-weight: 600; padding: 8px 14px; border-radius: 999px; animation: pulse 1.8s infinite; }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+    .phone.playing .hint { display: none; }
+    .steps-nav { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; }
+    .dot {
+      border: 1.5px solid var(--line); background: var(--card); color: var(--muted); border-radius: 999px;
+      padding: 6px 12px; font: 600 12px "Inter", sans-serif; cursor: pointer;
     }
-    .m-card strong { font-size: 13px; display: block; }
-    .m-card small { font-size: 11px; color: var(--muted); display: block; }
-    .m-card em { font-size: 10px; font-style: normal; color: var(--wine); font-weight: 600; }
-    .tag-p { color: var(--pending); font-size: 11px; font-weight: 600; }
-    .tag-d { color: var(--done); font-size: 11px; font-weight: 600; }
+    .dot.on { background: var(--btn); color: var(--btn-ink); border-color: var(--btn); }
+    .pin-drop { animation: drop 1.4s ease-out infinite; transform-origin: center bottom; }
+    @keyframes drop { 0% { transform: translateY(-10px); opacity: 0; } 40%,100% { transform: none; opacity: 1; } }
 
     /* Sections */
     section { padding: 56px 0; }
-    section.alt { background: var(--card); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-    h2 { font-size: clamp(26px, 4vw, 36px); line-height: 1.2; margin: 0 0 12px; color: var(--wine); }
+    section.alt { background: var(--alt); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    h2 { font-size: clamp(26px, 4vw, 36px); line-height: 1.2; margin: 0 0 12px; color: var(--head); }
     .section-lead { color: var(--muted); max-width: 640px; margin: 0 0 28px; font-size: 17px; }
     .grid { display: grid; gap: 16px; }
     @media (min-width: 760px) { .grid.three { grid-template-columns: repeat(3, 1fr); } .grid.two { grid-template-columns: repeat(2, 1fr); } }
-    .card {
-      background: var(--card); border: 1px solid var(--line);
-      border-radius: 14px; padding: 22px;
-    }
-    section.alt .card { background: var(--sand); }
-    .card h3 { margin: 0 0 6px; font-size: 18px; }
-    .card p { margin: 0; color: var(--muted); }
-    .num {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: var(--wine); color: var(--sand);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; margin-bottom: 12px;
-    }
-    .quote {
-      font-size: clamp(20px, 3vw, 26px); font-weight: 600;
-      color: var(--ink); max-width: 700px; margin: 0;
-    }
-
-    /* Install steps */
-    ol.steps { margin: 0; padding-left: 22px; }
-    ol.steps li { margin-bottom: 10px; }
-    .note {
-      background: var(--sand); border-left: 4px solid var(--wine);
-      padding: 14px 16px; border-radius: 8px; margin-top: 18px; color: var(--muted);
-    }
-
-    /* FAQ */
-    details {
-      background: var(--card); border: 1px solid var(--line);
-      border-radius: 12px; padding: 14px 18px; margin-bottom: 10px;
-    }
-    summary { font-weight: 600; cursor: pointer; }
-    details p { margin: 10px 0 0; color: var(--muted); }
-
-    /* Footer */
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+    section.alt .card { background: var(--bg); }
+    .card h3 { margin: 0 0 6px; font-size: 18px; } .card p { margin: 0; color: var(--muted); }
+    .num { width: 36px; height: 36px; border-radius: 50%; background: var(--btn); color: var(--btn-ink); display: flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 12px; }
+    .quote { font-size: clamp(20px, 3vw, 26px); font-weight: 600; max-width: 700px; margin: 0; }
+    ol.steps { margin: 0; padding-left: 22px; } ol.steps li { margin-bottom: 10px; }
+    .note { background: var(--card); border-left: 4px solid var(--head); padding: 14px 16px; border-radius: 8px; margin-top: 18px; color: var(--muted); }
+    details { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; }
+    summary { font-weight: 600; cursor: pointer; } details p { margin: 10px 0 0; color: var(--muted); }
     footer { padding: 36px 0 48px; color: var(--muted); font-size: 14px; text-align: center; }
-    footer a { color: var(--wine); }
+    footer a { color: var(--head); }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+      html { scroll-behavior: auto; }
+    }
   </style>
 </head>
 <body>
-  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="logo" viewBox="140 144 348 350"><g fill="#7F011F" stroke="#7F011F" stroke-width="6" stroke-linejoin="round"><polygon points="146,150 304,240 236,286 236,422 154,486 146,480"/><polygon points="482,150 324,240 392,286 392,422 474,486 482,480"/></g><g fill="#7F011F"><path fill-rule="evenodd" d="M268,423 V334 A46,46 0 0 1 360,334 V423 Z M351,368 a15,15 0 1 0 -30,0 a15,15 0 1 0 30,0 Z"/><polygon points="264,434 364,434 410,487 218,487"/></g></symbol></svg>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="logo" viewBox="140 144 348 350">
+      <g fill="currentColor" stroke="currentColor" stroke-width="6" stroke-linejoin="round">
+        <polygon points="146,150 304,240 236,286 236,422 154,486 146,480"/>
+        <polygon points="482,150 324,240 392,286 392,422 474,486 482,480"/>
+      </g>
+      <g fill="currentColor">
+        <path fill-rule="evenodd" d="M268,423 V334 A46,46 0 0 1 360,334 V423 Z M351,368 a15,15 0 1 0 -30,0 a15,15 0 1 0 30,0 Z"/>
+        <polygon points="264,434 364,434 410,487 218,487"/>
+      </g>
+    </symbol>
+    <symbol id="streets" viewBox="0 0 300 300">
+      <rect class="blk" x="20" y="30" width="70" height="50" rx="4"/><rect class="blk" x="110" y="20" width="80" height="60" rx="4"/>
+      <rect class="blk" x="210" y="40" width="70" height="55" rx="4"/><rect class="blk" x="30" y="130" width="60" height="70" rx="4"/>
+      <rect class="blk" x="120" y="120" width="70" height="55" rx="4"/><rect class="blk" x="215" y="140" width="65" height="70" rx="4"/>
+      <path class="road" d="M0 100H300M0 215H300M100 0V300M200 0V300"/>
+      <path class="main" d="M0 255C80 240 130 180 160 150S250 70 300 60"/>
+    </symbol>
+  </svg>
+
+  <div class="map-bg" aria-hidden="true">
+    <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+      <rect class="blk" x="40" y="60" width="180" height="120" rx="6"/><rect class="blk" x="260" y="40" width="220" height="140" rx="6"/>
+      <rect class="blk" x="540" y="70" width="180" height="110" rx="6"/><rect class="blk" x="800" y="50" width="260" height="130" rx="6"/>
+      <rect class="blk" x="60" y="260" width="200" height="150" rx="6"/><rect class="blk" x="330" y="250" width="160" height="160" rx="6"/>
+      <rect class="blk" x="620" y="270" width="210" height="140" rx="6"/><rect class="blk" x="900" y="280" width="220" height="150" rx="6"/>
+      <rect class="blk" x="80" y="520" width="230" height="150" rx="6"/><rect class="blk" x="400" y="520" width="190" height="170" rx="6"/>
+      <rect class="blk" x="690" y="530" width="200" height="140" rx="6"/><rect class="blk" x="960" y="540" width="180" height="150" rx="6"/>
+      <path class="road" d="M0 220H1200M0 460H1200M0 720H1200M240 0V800M500 0V800M760 0V800M1010 0V800"/>
+      <path class="road" d="M0 120L1200 330M0 600L1200 420"/>
+      <path class="main" d="M-20 700C200 640 330 520 520 460S860 330 1220 150"/>
+      <path class="main" d="M300 820C330 600 560 560 700 380S900 120 940 -20"/>
+      <g id="lights"></g>
+    </svg>
+  </div>
 
   <header>
     <div class="wrap nav">
       <a class="brand" href="#top">
-        <svg width="34" height="34" aria-hidden="true"><use href="#logo"/></svg>
+        <svg class="logo" width="34" height="34" aria-hidden="true"><use href="#logo"/></svg>
         Medresha
       </a>
-      <a class="btn small" href="#download">Download</a>
+      <div class="nav-right">
+        <button class="toggle" id="theme" type="button" aria-label="Switch between day and night map"></button>
+        <a class="btn small" href="#download">Download</a>
+      </div>
     </div>
   </header>
 
@@ -187,26 +227,49 @@
       </div>
 
       <div class="phone-wrap">
-        <div class="phone" role="img" aria-label="Medresha home screen showing a list of saved places">
-          <p class="m-brand">MEDRESHA · <span class="am">መድረሻ</span></p>
-          <p class="m-title">My Places</p>
-          <p class="m-sub">Save the exact door. Find it again anytime.</p>
-          <div class="m-stats">
-            <div class="m-stat"><b style="color:#B45309">2</b><span>Pending</span></div>
-            <div class="m-stat"><b style="color:#2E7D4F">1</b><span>Done</span></div>
+        <div class="phone" id="phone" role="button" tabindex="0" aria-label="Tap to try a live demo of the Medresha app">
+          <div class="hint"><span>Tap to try the demo</span></div>
+
+          <div class="screen on" data-s="0">
+            <p class="m-brand">MEDRESHA · <span class="am">መድረሻ</span></p>
+            <p class="m-title">My Places</p>
+            <p class="m-sub">Save the exact door. Find it again anytime.</p>
+            <div class="m-stats">
+              <div class="m-stat"><b style="color:var(--pending)">2</b><span>Pending</span></div>
+              <div class="m-stat"><b style="color:var(--done)">1</b><span>Done</span></div>
+            </div>
+            <div class="m-card hit"><div><strong>Selam Pharmacy</strong><small>Blue gate, behind the church</small><em>Pin saved</em></div><span class="tag-p">Pending</span></div>
+            <div class="m-card"><div><strong>Dawit's Shop</strong><small>2nd floor, green door</small><em>Pin saved</em></div><span class="tag-p">Pending</span></div>
+            <div class="m-card"><div><strong>Hana's Office</strong><small>Next to the bank, side door</small><em>Pin saved</em></div><span class="tag-d">Done</span></div>
           </div>
-          <div class="m-card">
-            <div><strong>Selam Pharmacy</strong><small>Blue gate, behind the church</small><em>Pin saved</em></div>
-            <span class="tag-p">Pending</span>
+
+          <div class="screen" data-s="1">
+            <p class="m-brand">PLACE</p>
+            <p class="m-title">Selam Pharmacy</p>
+            <svg class="mini" viewBox="0 0 300 150" preserveAspectRatio="xMidYMid slice">
+              <use href="#streets" width="300" height="300" y="-60"/>
+              <g class="pin-drop"><path d="M150 40c-12 0-21 9-21 21 0 16 21 38 21 38s21-22 21-38c0-12-9-21-21-21z" fill="#7F011F"/><circle cx="150" cy="61" r="8" fill="#F5EBD0"/></g>
+            </svg>
+            <div class="m-note">Blue gate, behind the church. Ring the bell twice.</div>
+            <div class="m-btns"><span>Call</span><span>Maps</span><span>Share</span></div>
           </div>
-          <div class="m-card">
-            <div><strong>Dawit's Shop</strong><small>2nd floor, green door</small><em>Pin saved</em></div>
-            <span class="tag-p">Pending</span>
+
+          <div class="screen" data-s="2">
+            <p class="m-brand">ALL PLACES</p>
+            <p class="m-title">Your map</p>
+            <svg class="full" viewBox="0 0 280 330" preserveAspectRatio="xMidYMid slice">
+              <use href="#streets" width="420" height="420" x="-60" y="-40"/>
+              <g fill="#7F011F"><path d="M90 120c-9 0-16 7-16 16 0 12 16 28 16 28s16-16 16-28c0-9-7-16-16-16z"/><path d="M190 200c-9 0-16 7-16 16 0 12 16 28 16 28s16-16 16-28c0-9-7-16-16-16z"/></g>
+              <path d="M215 90c-9 0-16 7-16 16 0 12 16 28 16 28s16-16 16-28c0-9-7-16-16-16z" fill="#7F011F" opacity=".35"/>
+              <circle cx="140" cy="260" r="9" fill="#2F6690" stroke="#fff" stroke-width="3"/>
+            </svg>
+            <div class="m-btns"><span>My location</span><span>Show all</span></div>
           </div>
-          <div class="m-card">
-            <div><strong>Hana's Office</strong><small>Next to the bank, side door</small><em>Pin saved</em></div>
-            <span class="tag-d">Done</span>
-          </div>
+        </div>
+        <div class="steps-nav" id="steps">
+          <button class="dot on" type="button" data-go="0">1 · Your list</button>
+          <button class="dot" type="button" data-go="1">2 · The door</button>
+          <button class="dot" type="button" data-go="2">3 · The map</button>
         </div>
       </div>
     </div>
@@ -264,33 +327,72 @@
     <section class="alt">
       <div class="wrap">
         <h2>Questions</h2>
-        <details>
-          <summary>Does it work without internet?</summary>
-          <p>Your saved places and notes open without internet. The map pictures need internet to load.</p>
-        </details>
-        <details>
-          <summary>Is there an iPhone version?</summary>
-          <p>Not yet. Medresha is Android only for now.</p>
-        </details>
-        <details>
-          <summary>Do I need an account?</summary>
-          <p>No. Open the app and start saving places.</p>
-        </details>
-        <details>
-          <summary>Who made it?</summary>
-          <p>Kaleb Dawit, a developer and designer in Addis Ababa. See more at <a href="https://kalebdawit.vercel.app">kalebdawit.vercel.app</a>.</p>
-        </details>
+        <details><summary>Does it work without internet?</summary><p>Your saved places and notes open without internet. The map pictures need internet to load.</p></details>
+        <details><summary>Is there an iPhone version?</summary><p>Not yet. Medresha is Android only for now.</p></details>
+        <details><summary>Do I need an account?</summary><p>No. Open the app and start saving places.</p></details>
+        <details><summary>Who made it?</summary><p>Kaleb Dawit, a developer and designer in Addis Ababa. See more at <a href="https://kalebdawit.vercel.app">kalebdawit.vercel.app</a>.</p></details>
       </div>
     </section>
   </main>
 
   <footer>
     <div class="wrap">
-      <svg width="44" height="44" aria-hidden="true" style="margin-bottom:8px"><use href="#logo"/></svg>
+      <svg class="logo" width="44" height="44" aria-hidden="true" style="margin-bottom:8px"><use href="#logo"/></svg>
       <p>© 2026 Kaleb Dawit. All rights reserved.</p>
       <p>Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · <a href="https://github.com/kaleb2343/medresha">Code on GitHub</a></p>
     </div>
   </footer>
 
+  <script>
+    (function () {
+      var root = document.documentElement, btn = document.getElementById("theme");
+      function label() { btn.textContent = root.getAttribute("data-theme") === "night" ? "☀ Day map" : "☾ Night map"; }
+      label();
+      btn.addEventListener("click", function () {
+        var t = root.getAttribute("data-theme") === "night" ? "day" : "night";
+        root.setAttribute("data-theme", t);
+        try { localStorage.setItem("medresha-theme", t); } catch (e) {}
+        label();
+      });
+
+      // City lights for the night map
+      var g = document.getElementById("lights"), s = "";
+      for (var i = 0; i < 70; i++) {
+        var x = (i * 137 + 53) % 1200, y = (i * 89 + 31) % 800, r = 1.2 + (i % 3) * 0.7;
+        s += '<circle class="lt" cx="' + x + '" cy="' + y + '" r="' + r + '" opacity="' + (0.35 + (i % 4) * 0.15) + '"/>';
+      }
+      g.innerHTML = s;
+
+      // Live phone demo
+      var phone = document.getElementById("phone"),
+          screens = phone.querySelectorAll(".screen"),
+          dots = document.querySelectorAll("#steps .dot"),
+          cur = 0, timer = null,
+          still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+      function show(n) {
+        cur = (n + screens.length) % screens.length;
+        screens.forEach(function (el, i) { el.classList.toggle("on", i === cur); });
+        dots.forEach(function (el, i) { el.classList.toggle("on", i === cur); });
+      }
+      function play() {
+        phone.classList.add("playing");
+        if (still || timer) return;
+        timer = setInterval(function () { show(cur + 1); }, 2800);
+      }
+      function stop() { clearInterval(timer); timer = null; }
+      phone.addEventListener("click", function () {
+        if (!phone.classList.contains("playing")) { play(); show(cur + 1); }
+        else { stop(); show(cur + 1); }
+      });
+      phone.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); phone.click(); }
+      });
+      dots.forEach(function (d) {
+        d.addEventListener("click", function () {
+          phone.classList.add("playing"); stop(); show(+d.getAttribute("data-go"));
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
