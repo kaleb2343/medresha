@@ -1,8 +1,14 @@
+<p align="center">
+  <img src="landing/favicon.svg" alt="Medresha logo" width="96" />
+</p>
+
 # Medresha (መድረሻ)
 
 **Save the exact door. Find it again anytime.**
 
-Medresha is a simple Android app for delivery people in Addis Ababa. Addis has few street addresses, so drivers often hear "blue gate, behind the pharmacy" and get lost. Medresha works like a notebook with a map: drop a pin on the exact door, write a short note, and find it again next time.
+Medresha is a simple, free Android app for delivery people in Addis Ababa. Addis has few street addresses, so drivers often hear "blue gate, behind the pharmacy" and get lost. Medresha works like a notebook with a map: drop a pin on the exact door, write a short note, and find it again next time.
+
+**[Download the Android app](https://github.com/kaleb2343/medresha/releases/latest/download/medresha.apk)** · **[Visit the website](https://medresha.vercel.app)** · [All releases](https://github.com/kaleb2343/medresha/releases)
 
 ## What it does
 
@@ -15,6 +21,13 @@ Medresha is a simple Android app for delivery people in Addis Ababa. Addis has f
 - Edit a place, mark it as Done, or delete it
 - Places are saved on the phone, so no account or server is needed
 
+## Install (Android)
+
+1. Download `medresha.apk` from the link above (about 23 MB).
+2. Open the file. If Android asks, allow installing from your browser.
+3. If Google Play Protect shows a warning, tap **More details**, then **Install anyway**. The app is new and not on the Play Store yet.
+4. Open Medresha and tap **+** to save your first place.
+
 ## Built with
 
 - React Native and Expo (Expo Router, TypeScript)
@@ -22,16 +35,17 @@ Medresha is a simple Android app for delivery people in Addis Ababa. Addis has f
 - Expo Location for the "Use my location" button
 - Leaflet and OpenStreetMap inside a WebView for the map
 - EAS Build for the Android APK
+- Plain HTML and CSS for the landing page (`landing/`), hosted on Vercel
 
 ## Run it on your computer
 
 1. Install the tools: `npm install`
-2. Start the app: `npx expo start` (add `--tunnel` if your phone is on a different network)
+2. Start the app: `npx expo start` (add `--tunnel` if your phone is on a different network, or `--lan` if both are on the same Wi-Fi)
 3. Open the link in the Expo Go app on your phone
 
 ## Status
 
-Work in progress. The Android APK works on a real phone. Next: the final logo and icon, a landing page, and a public download.
+Version 1.0.0 is out. The Android APK works on real phones, with the final logo and icon.
 
 ## Credits
 
