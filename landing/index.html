@@ -15,6 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+Ethiopic:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
   <script>
     (function () {
       var t = null;
@@ -63,6 +64,17 @@
                   radial-gradient(700px 400px at 10% 0%, rgba(47,102,144,.10), transparent 70%);
     }
     [data-theme="night"] .map-bg::after { opacity: 1; }
+
+    /* Real map (loads after the page; the drawn map is the backup) */
+    #realmap { position: absolute; inset: 0; opacity: 0; transition: opacity 1.4s, filter .5s;
+      filter: sepia(.55) saturate(1.25) hue-rotate(-8deg); }
+    [data-theme="night"] #realmap { filter: sepia(1) hue-rotate(-18deg) saturate(2.4) brightness(1.7) contrast(1.15); }
+    .map-bg.live #realmap { opacity: 1; }
+    .map-bg > svg { transition: opacity 1.4s; }
+    .map-bg.live > svg { opacity: 0; }
+    .map-bg::before { content: ""; position: absolute; inset: 0; z-index: 1; background: var(--bg); opacity: .6; transition: opacity .5s, background .5s; }
+    [data-theme="night"] .map-bg::before { opacity: .5; }
+    .map-bg::after { z-index: 2; }
 
     /* Header */
     header { padding: 18px 0; }
@@ -181,7 +193,8 @@
     </symbol>
   </svg>
 
-  <div class="map-bg" aria-hidden="true">
+  <div class="map-bg" id="mapbg" aria-hidden="true">
+    <div id="realmap"></div>
     <svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
       <rect class="blk" x="40" y="60" width="180" height="120" rx="6"/><rect class="blk" x="260" y="40" width="220" height="140" rx="6"/>
       <rect class="blk" x="540" y="70" width="180" height="110" rx="6"/><rect class="blk" x="800" y="50" width="260" height="130" rx="6"/>
@@ -339,7 +352,7 @@
     <div class="wrap">
       <svg class="logo" width="44" height="44" aria-hidden="true" style="margin-bottom:8px"><use href="#logo"/></svg>
       <p>© 2026 Kaleb Dawit. All rights reserved.</p>
-      <p>Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · <a href="https://github.com/kaleb2343/medresha">Code on GitHub</a></p>
+      <p>Map: <a href="https://openfreemap.org">OpenFreeMap</a> © <a href="https://openmaptiles.org">OpenMapTiles</a> · Data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors · <a href="https://github.com/kaleb2343/medresha">Code on GitHub</a></p>
     </div>
   </footer>
 
@@ -353,6 +366,7 @@
         root.setAttribute("data-theme", t);
         try { localStorage.setItem("medresha-theme", t); } catch (e) {}
         label();
+        if (window.__setMapStyle) window.__setMapStyle();
       });
 
       // City lights for the night map
@@ -362,6 +376,40 @@
         s += '<circle class="lt" cx="' + x + '" cy="' + y + '" r="' + r + '" opacity="' + (0.35 + (i % 4) * 0.15) + '"/>';
       }
       g.innerHTML = s;
+
+      // Real map of Addis Ababa behind the page
+      var mbg = document.getElementById("mapbg"), gl = null;
+      var LIGHT = "https://tiles.openfreemap.org/styles/positron", DARK = "https://tiles.openfreemap.org/styles/dark";
+      function styleUrl() { return root.getAttribute("data-theme") === "night" ? DARK : LIGHT; }
+      window.__setMapStyle = function () { if (gl) gl.setStyle(styleUrl()); };
+      function drift() {
+        var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (reduce || window.innerWidth < 700) return;
+        var t0 = performance.now(), last = 0;
+        (function f(now) {
+          if (!document.hidden && now - last > 33) {
+            last = now; var t = now - t0;
+            gl.jumpTo({ center: [38.7613 + 0.010 * Math.sin(t / 38000), 9.0108 + 0.005 * Math.cos(t / 52000)], bearing: 6 * Math.sin(t / 61000) });
+          }
+          requestAnimationFrame(f);
+        })(t0);
+      }
+      function startMap() {
+        if (!window.maplibregl) return;
+        try {
+          gl = new maplibregl.Map({ container: "realmap", style: styleUrl(), center: [38.7613, 9.0108], zoom: 13.3,
+            interactive: false, attributionControl: false, fadeDuration: 0 });
+          gl.on("load", function () { mbg.classList.add("live"); drift(); });
+        } catch (e) {}
+      }
+      function loadMap() {
+        if (navigator.connection && navigator.connection.saveData) return;
+        var sc = document.createElement("script");
+        sc.src = "https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js";
+        sc.onload = startMap;
+        document.head.appendChild(sc);
+      }
+      window.addEventListener("load", function () { setTimeout(loadMap, 300); });
 
       // Live phone demo
       var phone = document.getElementById("phone"),
