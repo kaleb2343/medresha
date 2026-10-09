@@ -43,7 +43,7 @@ Medresha is a simple, free Android app for delivery people in Addis Ababa. Addis
 2. Start the app: `npx expo start` (add `--tunnel` if your phone is on a different network, or `--lan` if both are on the same Wi-Fi)
 3. Open the link in the Expo Go app on your phone
 
-## Status
+## Status 
 
 Version 1.0.0 is out. The Android APK works on real phones, with the final logo and icon.
 
