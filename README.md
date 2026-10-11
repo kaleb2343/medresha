@@ -44,10 +44,10 @@ Medresha is a simple, free Android app for delivery people in Addis Ababa. Addis
 3. Open the link in the Expo Go app on your phone
 
 ## Status 
-
+ 
 Version 1.0.0 is out. The Android APK works on real phones, with the final logo and icon.
                         
-## Credits
+## Credits 
 
 Map data and place search from OpenStreetMap contributors. Map display by Leaflet.
 
