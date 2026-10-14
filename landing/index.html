@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Medresha (መድረሻ) | Save the exact door</title>
   <meta name="description" content="Medresha is a free Android notebook with a map for delivery people in Addis Ababa. Drop a pin on the exact door, write a note, and find it again anytime." />
   <meta property="og:title" content="Medresha (መድረሻ) | Save the exact door" />
@@ -15,7 +15,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+Ethiopic:wght@500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.css" /></noscript>
   <script>
     (function () {
       var t = null;
@@ -31,6 +32,7 @@
       --btn: #7F011F; --btn-h: #5E0117; --btn-ink: #F5EBD0;
       --road: rgba(127,1,31,.13); --road-main: rgba(127,1,31,.24); --block: rgba(127,1,31,.05);
       --light: transparent; --edge: #2B0A12; --done: #2E7D4F; --pending: #B45309;
+      --lead: #5E3A42; --scrim: rgba(245,235,208,.84);
     }
     [data-theme="night"] {
       --bg: #0B0709; --card: #170B10; --alt: rgba(23,11,16,.86);
@@ -38,9 +40,11 @@
       --btn: #9A0B2D; --btn-h: #B3123A; --btn-ink: #F5EBD0;
       --road: rgba(245,235,208,.10); --road-main: rgba(255,200,120,.32); --block: rgba(245,235,208,.035);
       --light: #FFD28A; --edge: #2E1B22; --done: #5FD08A; --pending: #F0A64A;
+      --lead: #E8D8C4; --scrim: rgba(11,7,9,.78);
     }
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    button, .btn, .phone { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
     body {
       margin: 0; font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
       background: var(--bg); color: var(--ink); line-height: 1.6;
@@ -48,11 +52,11 @@
     }
     .am { font-family: "Noto Sans Ethiopic", "Inter", sans-serif; }
     a { color: inherit; }
-    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 max(20px, env(safe-area-inset-right)) 0 max(20px, env(safe-area-inset-left)); }
     main, header, footer { position: relative; z-index: 1; }
 
     /* Map background */
-    .map-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    .map-bg { position: fixed; top: 0; left: 0; right: 0; height: 100vh; height: 100lvh; z-index: 0; pointer-events: none; }
     .map-bg svg { width: 100%; height: 100%; display: block; }
     .map-bg .road { fill: none; stroke: var(--road); stroke-width: 3; stroke-linecap: round; }
     .map-bg .main { fill: none; stroke: var(--road-main); stroke-width: 6; stroke-linecap: round; }
@@ -78,19 +82,20 @@
 
     /* Header */
     header { padding: 18px 0; }
-    .nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; color: var(--head); text-decoration: none; }
+    .nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: nowrap; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; color: var(--head); text-decoration: none; white-space: nowrap; min-width: 0; }
     .logo { color: var(--wine); } [data-theme="night"] .logo { color: var(--ink); }
-    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .nav-right { display: flex; align-items: center; gap: 10px; flex: none; }
     .toggle {
       border: 1.5px solid var(--line); background: var(--card); color: var(--ink);
       border-radius: 999px; padding: 8px 14px; font: 600 14px "Inter", sans-serif; cursor: pointer;
+      white-space: nowrap; min-height: 40px;
     }
     .toggle:hover { border-color: var(--head); }
 
     .btn {
       display: inline-block; background: var(--btn); color: var(--btn-ink);
-      padding: 14px 26px; border-radius: 12px; font-weight: 600; text-decoration: none;
+      padding: 14px 26px; border-radius: 12px; font-weight: 600; text-decoration: none; white-space: nowrap;
     }
     .btn:hover { background: var(--btn-h); }
     .btn.small { padding: 9px 18px; font-size: 15px; }
@@ -100,11 +105,14 @@
     /* Hero */
     .hero { display: grid; gap: 40px; padding: 36px 0 64px; align-items: center; }
     @media (min-width: 860px) { .hero { grid-template-columns: 1.1fr 0.9fr; } }
-    .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; }
+    .hero-copy { position: relative; isolation: isolate; }
+    .hero-copy::before { content: ""; position: absolute; inset: -10px -8px; z-index: -1; border-radius: 26px;
+      background: var(--scrim); box-shadow: 0 0 26px 18px var(--scrim); transition: background .5s, box-shadow .5s; }
+    .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: 1.5px; color: var(--lead); text-transform: uppercase; }
     h1 { font-size: clamp(34px, 6vw, 56px); line-height: 1.1; margin: 8px 0 16px; color: var(--head); }
-    .lead { font-size: 18px; color: var(--muted); max-width: 520px; margin: 0 0 24px; }
+    .lead { font-size: 18px; color: var(--lead); max-width: 520px; margin: 0 0 24px; }
     .cta-row { display: flex; flex-wrap: wrap; gap: 12px; }
-    .meta { font-size: 14px; color: var(--muted); margin-top: 14px; }
+    .meta { font-size: 14px; color: var(--lead); margin-top: 14px; }
 
     /* Live phone demo */
     .phone-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
@@ -141,7 +149,7 @@
     .steps-nav { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: center; }
     .dot {
       border: 1.5px solid var(--line); background: var(--card); color: var(--muted); border-radius: 999px;
-      padding: 6px 12px; font: 600 12px "Inter", sans-serif; cursor: pointer;
+      padding: 8px 14px; font: 600 12px "Inter", sans-serif; cursor: pointer; min-height: 36px;
     }
     .dot.on { background: var(--btn); color: var(--btn-ink); border-color: var(--btn); }
     .pin-drop { animation: drop 1.4s ease-out infinite; transform-origin: center bottom; }
@@ -151,7 +159,7 @@
     section { padding: 56px 0; }
     section.alt { background: var(--alt); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
     h2 { font-size: clamp(26px, 4vw, 36px); line-height: 1.2; margin: 0 0 12px; color: var(--head); }
-    .section-lead { color: var(--muted); max-width: 640px; margin: 0 0 28px; font-size: 17px; }
+    .section-lead { color: var(--lead); max-width: 640px; margin: 0 0 28px; font-size: 17px; }
     .grid { display: grid; gap: 16px; }
     @media (min-width: 760px) { .grid.three { grid-template-columns: repeat(3, 1fr); } .grid.two { grid-template-columns: repeat(2, 1fr); } }
     .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
@@ -163,8 +171,31 @@
     .note { background: var(--card); border-left: 4px solid var(--head); padding: 14px 16px; border-radius: 8px; margin-top: 18px; color: var(--muted); }
     details { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; }
     summary { font-weight: 600; cursor: pointer; } details p { margin: 10px 0 0; color: var(--muted); }
-    footer { padding: 36px 0 48px; color: var(--muted); font-size: 14px; text-align: center; }
+    footer { padding: 36px 0 48px; color: var(--muted); font-size: 14px; text-align: center; overflow-wrap: anywhere; }
     footer a { color: var(--head); }
+
+    /* Phones */
+    .toggle .more { display: inline; }
+    @media (min-width: 860px) { .hero-copy::before { opacity: .55; } }
+    @media (max-width: 520px) {
+      header { padding: 14px 0; }
+      .brand { font-size: 18px; gap: 8px; }
+      .brand .logo { width: 30px; height: 30px; }
+      .nav-right { gap: 8px; }
+      .toggle { padding: 7px 12px; font-size: 13px; }
+      .toggle .more { display: none; }
+      .btn.small { padding: 10px 16px; font-size: 14px; min-height: 40px; }
+      .map-bg::before { opacity: .76; }
+      [data-theme="night"] .map-bg::before { opacity: .68; }
+      .hero { gap: 32px; padding: 22px 0 48px; }
+      .lead { font-size: 17px; }
+      .cta-row .btn { flex: 1 1 auto; text-align: center; }
+      .btn.ghost { padding: 12px 22px; }
+      .phone { max-width: 100%; }
+      section { padding: 44px 0; }
+      .card { padding: 18px; }
+      .quote { font-size: 20px; }
+    }
 
     @media (prefers-reduced-motion: reduce) {
       * { animation: none !important; transition: none !important; }
@@ -225,7 +256,7 @@
 
   <main id="top">
     <div class="wrap hero">
-      <div>
+      <div class="hero-copy">
         <div class="eyebrow">Medresha · <span class="am">መድረሻ</span></div>
         <h1>Save the exact door. Find it again anytime.</h1>
         <p class="lead">
@@ -359,7 +390,7 @@
   <script>
     (function () {
       var root = document.documentElement, btn = document.getElementById("theme");
-      function label() { btn.textContent = root.getAttribute("data-theme") === "night" ? "☀ Day map" : "☾ Night map"; }
+      function label() { btn.innerHTML = (root.getAttribute("data-theme") === "night" ? "☀ Day" : "☾ Night") + '<span class="more"> map</span>'; }
       label();
       btn.addEventListener("click", function () {
         var t = root.getAttribute("data-theme") === "night" ? "day" : "night";
@@ -381,7 +412,19 @@
       var mbg = document.getElementById("mapbg"), gl = null;
       var LIGHT = "https://tiles.openfreemap.org/styles/positron", DARK = "https://tiles.openfreemap.org/styles/dark";
       function styleUrl() { return root.getAttribute("data-theme") === "night" ? DARK : LIGHT; }
-      window.__setMapStyle = function () { if (gl) gl.setStyle(styleUrl()); };
+      window.__setMapStyle = function () { if (gl) gl.setStyle(styleUrl(), { diff: false }); };
+      // Fade the street names so they never fight with the text on top of them
+      function softenLabels() {
+        if (!gl) return;
+        var op = window.innerWidth < 700 ? 0.3 : 0.55;
+        try {
+          gl.getStyle().layers.forEach(function (l) {
+            if (l.type !== "symbol") return;
+            try { gl.setPaintProperty(l.id, "text-opacity", op); } catch (e) {}
+            try { gl.setPaintProperty(l.id, "icon-opacity", op); } catch (e) {}
+          });
+        } catch (e) {}
+      }
       function drift() {
         var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
         if (reduce || window.innerWidth < 700) return;
@@ -398,12 +441,15 @@
         if (!window.maplibregl) return;
         try {
           gl = new maplibregl.Map({ container: "realmap", style: styleUrl(), center: [38.7613, 9.0108], zoom: 13.3,
-            interactive: false, attributionControl: false, fadeDuration: 0 });
+            interactive: false, attributionControl: false, fadeDuration: 0,
+            pixelRatio: Math.min(window.devicePixelRatio || 1, 1.5) });
+          gl.on("style.load", softenLabels);
           gl.on("load", function () { mbg.classList.add("live"); drift(); });
         } catch (e) {}
       }
       function loadMap() {
         if (navigator.connection && navigator.connection.saveData) return;
+        if (navigator.deviceMemory && navigator.deviceMemory <= 1) return;
         var sc = document.createElement("script");
         sc.src = "https://cdn.jsdelivr.net/npm/maplibre-gl@4.7.1/dist/maplibre-gl.js";
         sc.onload = startMap;
