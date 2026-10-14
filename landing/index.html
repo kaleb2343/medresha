@@ -481,7 +481,7 @@
       phone.addEventListener("keydown", function (e) {
         if (e.key === "Enter" || e.key === " ") { e.preventDefault(); phone.click(); }
       });
-      dots.forEach(function (d) {
+      dots.forEach(function (d) { 
         d.addEventListener("click", function () {
           phone.classList.add("playing"); stop(); show(+d.getAttribute("data-go"));
         });
